@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.itliwei.tech</groupId>
+        <artifactId>kagaya</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <groupId>com.itliwei.tech.kagaya</groupId>
+    <artifactId>kagaya-db</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>kagaya-db</name>
+    <packaging>jar</packaging>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>7.9.2</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>8.0.16</version>
+                    </dependency>
+                    <!-- 解决乱码问题 -->
+                    <!--                    <dependency>-->
+                    <!--                        <groupId>org.mariadb.jdbc</groupId>-->
+                    <!--                        <artifactId>mariadb-java-client</artifactId>-->
+                    <!--                        <version>2.7.3</version>-->
+                    <!--                    </dependency>-->
+                </dependencies>
+                <configuration>
+                    <url>jdbc:mysql://localhost:3306/kagaya?useSSL=false</url>
+                    <user>root</user>
+                    <password></password>
+                    <schemas>
+                        <schema>kagaya</schema>
+                    </schemas>
+                    <placeholders>
+                        <keyABC>valueXYZ</keyABC>
+                        <otherplaceholder>value123</otherplaceholder>
+                    </placeholders>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>3.14.4</version>
+                <!-- The plugin should hook into the generate goal -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <!--                            <goal>generate</goal>-->
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>8.0.16</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <jdbc>
+                        <driver>com.mysql.cj.jdbc.Driver</driver>
+                        <url>jdbc:mysql://localhost:3306/kagaya?useSSL=false</url>
+                        <user>root</user>
+                        <password>123456</password>
+                    </jdbc>
+                    <generator>
+                        <strategy>
+                            <matchers>
+                                <tables>
+                                    <table>
+                                        <tableClass>
+                                            <transform>PASCAL</transform>
+                                            <expression>$0_TABLE</expression>
+                                        </tableClass>
+                                    </table>
+                                </tables>
+                            </matchers>
+                        </strategy>
+                        <generate>
+                            <validationAnnotations>true</validationAnnotations>
+                            <springAnnotations>true</springAnnotations>
+                            <daos>false</daos>
+                            <serializablePojos>false</serializablePojos>
+                            <pojos>true</pojos>
+                            <fluentSetters>true</fluentSetters>
+                        </generate>
+                        <database>
+                            <name>org.jooq.meta.mysql.MySQLDatabase</name>
+                            <includes>.*</includes>
+                            <excludes></excludes>
+                            <inputSchema>kagaya</inputSchema>
+                            <forcedTypes>
+                                <forcedType>
+                                    <userType>Long</userType>
+                                    <converter>com.itliwei.kagaya.LocalDateTimeConverter</converter>
+                                    <includeTypes>datetime\(3\)</includeTypes>
+                                </forcedType>
+                                <forcedType>
+                                    <name>BOOLEAN</name>
+                                    <includeTypes>(?i:TINYINT\(1\))</includeTypes>
+                                </forcedType>
+<!--                                <forcedType>-->
+<!--                                    &lt;!&ndash; Specify the Java type of your custom type. This corresponds to the Converter's <U> type. &ndash;&gt;-->
+<!--                                    <userType>com.fenbi.tutor.turing.enums.FieldType</userType>-->
+<!--                                    <lambdaConverter>-->
+<!--                                        <from>i -&gt; com.fenbi.tutor.turing.enums.IEnum.findById(i, FieldType.class)</from>-->
+<!--                                        <to>e -> e.getId()</to>-->
+<!--                                    </lambdaConverter>-->
+<!--                                    &lt;!&ndash; These are the same as for type rewriting &ndash;&gt;-->
+<!--                                    <includeExpression>field\.type</includeExpression>-->
+<!--                                    <includeTypes>.*</includeTypes>-->
+<!--                                </forcedType>-->
+                            </forcedTypes>
+                        </database>
+                        <target>
+                            <packageName>com.itliwei.kagaya.turing.storage.db.generated</packageName>
+                            <directory>../turing-server/src/main/java/</directory>
+                        </target>
+                    </generator>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
